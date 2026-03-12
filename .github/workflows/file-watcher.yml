@@ -1,0 +1,126 @@
+name: Langflow Source File Watcher
+
+on:
+  schedule:
+    - cron: "0 8 * * *"  # 05:00 BRT, daily — runs after nightly tests
+  workflow_dispatch: {}
+
+jobs:
+  watch-langflow-changes:
+    name: Check Langflow source for test-impacting changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout langflow-e2e repo
+        uses: actions/checkout@v4
+
+      - name: Checkout langflow upstream
+        uses: actions/checkout@v4
+        with:
+          repository: langflow-ai/langflow
+          path: langflow-upstream
+          fetch-depth: 0  # full history needed for git log
+
+      - name: Detect changes in monitored paths (last 24h)
+        id: detect
+        working-directory: langflow-upstream
+        run: |
+          SINCE="24 hours ago"
+
+          declare -A AREA_PATHS
+          AREA_PATHS["API (backend routes)"]="src/backend/base/langflow/api/"
+          AREA_PATHS["Components (backend)"]="src/backend/base/langflow/components/"
+          AREA_PATHS["Frontend pages"]="src/frontend/src/pages/"
+          AREA_PATHS["Frontend components"]="src/frontend/src/components/"
+          AREA_PATHS["Frontend stores"]="src/frontend/src/stores/"
+          AREA_PATHS["Authentication"]="src/backend/base/langflow/api/v1/login.py src/backend/base/langflow/api/v1/users.py"
+          AREA_PATHS["Flow execution"]="src/backend/base/langflow/api/v1/endpoints.py"
+
+          CHANGED_AREAS=""
+          CHANGE_DETAILS=""
+
+          for AREA in "${!AREA_PATHS[@]}"; do
+            PATH_LIST="${AREA_PATHS[$AREA]}"
+            COMMITS=$(git log --since="$SINCE" --oneline -- $PATH_LIST 2>/dev/null | head -5)
+            if [ -n "$COMMITS" ]; then
+              CHANGED_AREAS="$CHANGED_AREAS\n- **$AREA**"
+              CHANGE_DETAILS="$CHANGE_DETAILS\n\n### $AREA\n\`\`\`\n$COMMITS\n\`\`\`"
+            fi
+          done
+
+          if [ -n "$CHANGED_AREAS" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            # Store details as a multiline output
+            {
+              echo "areas<<EOF"
+              echo -e "$CHANGED_AREAS"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
+            {
+              echo "details<<EOF"
+              echo -e "$CHANGE_DETAILS"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create review issue if changes detected
+        if: steps.detect.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date().toISOString().split('T')[0];
+            const areas = `${{ steps.detect.outputs.areas }}`;
+            const details = `${{ steps.detect.outputs.details }}`;
+
+            // Map changed areas to checklist sections
+            const areaToChecklist = {
+              'API (backend routes)': 'ÁREA 10 — API REST',
+              'Components (backend)': 'ÁREA 9 — Componentes Principais',
+              'Frontend pages': 'ÁREA 2, 3, 6, 13 — Flows, Pastas, Playground, Settings',
+              'Frontend components': 'ÁREA 4, 5 — Canvas, Configuração de Componentes',
+              'Frontend stores': 'ÁREA 4, 6 — Canvas, Playground',
+              'Authentication': 'ÁREA 1 — Autenticação e Gerenciamento de Usuários',
+              'Flow execution': 'ÁREA 10.3 — Execução de Flows via API',
+            };
+
+            let checklistMapping = '';
+            for (const [key, value] of Object.entries(areaToChecklist)) {
+              if (areas.includes(key)) {
+                checklistMapping += `\n- ${key} → **${value}**`;
+              }
+            }
+
+            const body = [
+              '## Langflow source changes detected — test review required',
+              '',
+              `**Date:** ${today}`,
+              `**Source:** [langflow-ai/langflow](https://github.com/langflow-ai/langflow)`,
+              '',
+              '### Changed areas',
+              areas,
+              '',
+              '### Checklist sections to review',
+              checklistMapping || '- See REGRESSION_CHECKLIST.md for full mapping',
+              '',
+              '### Commits (last 24h)',
+              details,
+              '',
+              '### Action required',
+              '1. Review the commits above for breaking changes',
+              '2. Run the affected test areas: `npm run test:grep "<area>"`',
+              '3. Update failing or stale tests in this repo',
+              '4. Update `REGRESSION_CHECKLIST.md` if new scenarios were introduced',
+              '',
+              '/cc @lice-reis',
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Test Review] Langflow source changed on ${today} — validate affected tests`,
+              body,
+              labels: ['needs-review', 'langflow-upstream-change'],
+            });

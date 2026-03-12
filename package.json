@@ -1,0 +1,25 @@
+{
+  "name": "langflow-e2e",
+  "version": "1.0.0",
+  "description": "Langflow E2E regression test suite (Playwright)",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "test:core": "npx playwright test tests/core/",
+    "test:extended": "npx playwright test tests/extended/",
+    "test:features": "npx playwright test tests/core/features/ tests/extended/features/",
+    "test:integrations": "npx playwright test tests/core/integrations/",
+    "test:unit": "npx playwright test tests/core/unit/",
+    "test:regression": "npx playwright test tests/core/regression/ tests/extended/regression/",
+    "test:grep": "npx playwright test --grep",
+    "report": "npx playwright show-report"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "playwright": "^1.57.0",
+    "typescript": "^5.4.5"
+  }
+}

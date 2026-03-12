@@ -1,0 +1,140 @@
+name: Manual E2E Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      langflow_target:
+        description: |
+          Langflow target. Options:
+            • Docker tag: "latest", "1.3.0", "dev"
+            • Full URL of a running instance: "https://staging.example.com"
+        required: true
+        default: "latest"
+      test_suite:
+        description: "Test suite: all | core | extended | features | integrations | unit | regression"
+        required: false
+        default: "all"
+      test_grep:
+        description: "Additional filter (regex, e.g. 'login|logout')"
+        required: false
+        default: ""
+
+jobs:
+  detect-target:
+    runs-on: ubuntu-latest
+    outputs:
+      use_docker: ${{ steps.check.outputs.use_docker }}
+      base_url: ${{ steps.check.outputs.base_url }}
+      image_tag: ${{ steps.check.outputs.image_tag }}
+    steps:
+      - id: check
+        run: |
+          TARGET="${{ github.event.inputs.langflow_target }}"
+          if [[ "$TARGET" == http* ]]; then
+            echo "use_docker=false" >> $GITHUB_OUTPUT
+            echo "base_url=$TARGET" >> $GITHUB_OUTPUT
+            echo "image_tag=" >> $GITHUB_OUTPUT
+          else
+            echo "use_docker=true" >> $GITHUB_OUTPUT
+            echo "base_url=http://localhost:7860/" >> $GITHUB_OUTPUT
+            echo "image_tag=$TARGET" >> $GITHUB_OUTPUT
+          fi
+
+  e2e-docker:
+    name: E2E via Docker (${{ github.event.inputs.langflow_target }})
+    needs: detect-target
+    if: needs.detect-target.outputs.use_docker == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    services:
+      langflow:
+        image: langflowai/langflow:${{ needs.detect-target.outputs.image_tag }}
+        ports:
+          - 7860:7860
+        env:
+          LANGFLOW_AUTO_LOGIN: "true"
+          LANGFLOW_SUPERUSER: langflow
+          LANGFLOW_SUPERUSER_PASSWORD: langflow
+          LANGFLOW_DEACTIVATE_TRACING: "true"
+        options: >-
+          --health-cmd "curl -f http://localhost:7860/health_check || exit 1"
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 90s
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - name: Run tests
+        run: |
+          SUITE="${{ github.event.inputs.test_suite }}"
+          GREP="${{ github.event.inputs.test_grep }}"
+          case "$SUITE" in
+            core)       DIR="tests/core/" ;;
+            extended)   DIR="tests/extended/" ;;
+            features)   DIR="tests/core/features/ tests/extended/features/" ;;
+            integrations) DIR="tests/core/integrations/" ;;
+            unit)       DIR="tests/core/unit/" ;;
+            regression) DIR="tests/core/regression/ tests/extended/regression/" ;;
+            *)          DIR="" ;;
+          esac
+          CMD="npx playwright test $DIR --reporter=github"
+          [ -n "$GREP" ] && CMD="$CMD --grep '$GREP'"
+          eval $CMD
+        env:
+          CI: "true"
+          PLAYWRIGHT_BASE_URL: ${{ needs.detect-target.outputs.base_url }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-manual-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14
+
+  e2e-url:
+    name: E2E via URL (${{ github.event.inputs.langflow_target }})
+    needs: detect-target
+    if: needs.detect-target.outputs.use_docker == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - name: Run tests
+        run: |
+          SUITE="${{ github.event.inputs.test_suite }}"
+          GREP="${{ github.event.inputs.test_grep }}"
+          case "$SUITE" in
+            core)       DIR="tests/core/" ;;
+            extended)   DIR="tests/extended/" ;;
+            features)   DIR="tests/core/features/ tests/extended/features/" ;;
+            integrations) DIR="tests/core/integrations/" ;;
+            unit)       DIR="tests/core/unit/" ;;
+            regression) DIR="tests/core/regression/ tests/extended/regression/" ;;
+            *)          DIR="" ;;
+          esac
+          CMD="npx playwright test $DIR --reporter=github"
+          [ -n "$GREP" ] && CMD="$CMD --grep '$GREP'"
+          eval $CMD
+        env:
+          CI: "true"
+          PLAYWRIGHT_BASE_URL: ${{ needs.detect-target.outputs.base_url }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-manual-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14
