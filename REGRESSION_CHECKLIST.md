@@ -309,6 +309,20 @@
 - [-] Adicionar novo provider via modal → `core/features/model-provider-api-key.spec.ts`, `core/features/model-provider-modal-actions.spec.ts`
 - [-] Remover API key de provider existente → `core/features/remove-provider-api-key.spec.ts`
 
+### 8.3.1 Provedores Open-Source
+- [ ] Configurar e executar flow com Ollama (modelo local)
+- [ ] Configurar e executar flow com Groq
+- [ ] Configurar e executar flow com Mistral
+- [ ] Configurar e executar flow com outros provedores open-source disponíveis no modal
+
+### 8.3.2 Parâmetros de Modelo (Agent)
+- [ ] Parâmetro de temperatura — variação afeta o comportamento da resposta
+- [ ] Parâmetro de esforço (reasoning effort) — variação afeta profundidade do raciocínio
+- [ ] Quantidade máxima de tokens — resposta respeitada ao limite configurado
+- [ ] Quantidade máxima de tentativas e interações do agente — agente para ao atingir o limite
+- [ ] Uso de `context_id` customizado — memória isolada por contexto
+- [ ] Formatação do output — resposta respeita formato configurado (JSON, Markdown, texto simples)
+
 ### 8.4 Variáveis Globais (API Keys)
 - [-] Criar variável global → `core/features/globalVariables.spec.ts`
 - [ ] Usar variável global em componente (API key)
@@ -477,16 +491,16 @@
 | 5. Config Componentes | 25 | 20 | 0 | 5 |
 | 6. Playground | 18 | 15 | 1 | 2 |
 | 7. Templates | 35 | 33 | 0 | 2 |
-| 8. LLM Providers | 18 | 16 | 0 | 2 |
+| 8. LLM Providers | 28 | 16 | 0 | 12 |
 | 9. Componentes | 25 | 19 | 0 | 6 |
 | 10. API REST | 20 | 19 | 0 | 1 |
 | 11. MCP Server | 5 | 3 | 0 | 2 |
 | 12. Observabilidade | 6 | 6 | 0 | 0 |
 | 13. Settings | 4 | 4 | 0 | 0 |
 | 14. Erros / Edge Cases | 10 | 6 | 0 | 4 |
-| **TOTAL** | **241** | **228 (95%)** | **4** | **29 (5%)** |
+| **TOTAL** | **251** | **228 (91%)** | **4** | **39 (9%)** |
 
-> _Atualizado em 2026-03-10 (sessão 3) — novos testes: claude-model-switch, api-custom-component, remove-provider-api-key, group-enter-exit, settings-theme-toggle, traces-latency-tokens, agent-reasoning-steps, outdated-component-notification, save-flow-as-template. Correções: settings-appearance (skipModal), global-variable-remove (skipModal)._
+> _Atualizado em 2026-03-12 (sessão 4) — adicionados 10 novos cenários na Área 8: provedores open-source (Ollama, Groq, Mistral), parâmetros de modelo para agentes (temperatura, esforço, max tokens, max tentativas, context_id, formatação de output)._
 
 ---
 
