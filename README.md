@@ -69,21 +69,26 @@ Todo teste novo deve ter **pelo menos uma tag** e importar de `../../fixtures` (
 
 ## Estrutura
 
+### O que cada pasta faz
+
+| Pasta | Responsabilidade |
+|---|---|
+| `assets/` | Arquivos estáticos usados nos testes: documentos para upload, flows JSON prontos para importação e arquivos de mídia. Nenhum código aqui — só dados. |
+| `fixtures/` | Ponto de entrada para todos os testes. Estende o `test` do Playwright com monitoramento automático de erros de backend — intercepta respostas `4xx/5xx` e falhas silenciosas de flow em toda execução. Todo teste importa daqui, nunca do Playwright diretamente. |
+| `helpers/` | Funções de ações específicas reutilizáveis. Encapsulam operações concretas da aplicação — selecionar provedor e modelo de um agente, adicionar um componente customizado, fazer upload de arquivo, rodar um flow. Os testes chamam essas funções sem repetir os passos. |
+| `pages/` | Page Objects para navegação da interface. Cada arquivo representa uma área da UI e expõe funções para navegar até ela — abrir a Sidebar, acessar o Model Provider, ir para Settings, importar um flow. Concentra os seletores e evita que mudem em vários lugares ao mesmo tempo. |
+| `tests-automations/` | Onde vivem os testes. Organizado em `regression/` (cenários de regressão mapeados no checklist) e `smoke/` (verificações rápidas de sanidade). Dentro de `regression/`, cada subpasta corresponde a uma área funcional do Langflow. |
+
 ```
 tests/
-├── assets/                        # arquivos de suporte aos testes
+├── assets/
 │   ├── files/                     # documentos, PDFs, JSONs usados em upload
 │   ├── flows/                     # flows JSON pré-definidos para importação
 │   └── media/                     # imagens e arquivos de mídia
 │
-├── fixtures/                      # fixture base com monitoramento automático de erros de backend
+├── fixtures/
 │
-├── helpers/                       # Funções de ações específicas reutilizáveis entre testes.
-│   │                              # Cada helper encapsula uma operação concreta da aplicação,
-│   │                              # como selecionar o provedor e modelo de um agente, adicionar
-│   │                              # um componente customizado ao canvas, atualizar componentes
-│   │                              # desatualizados ou realizar o upload de um arquivo.
-│   │                              # Os testes chamam essas funções diretamente, sem repetir os passos.
+├── helpers/
 │   ├── api/                       # chamadas e validações de endpoints REST
 │   ├── auth/                      # login, logout, criação de usuários
 │   ├── filesystem/                # upload e gerenciamento de arquivos
@@ -92,11 +97,7 @@ tests/
 │   ├── other/                     # ações diversas sem categoria específica
 │   └── ui/                        # interações de canvas, componentes, sidebar e playground
 │
-├── pages/                         # Page Objects — conjunto de funções para navegação da interface.
-│   │                              # Cada página encapsula as ações e elementos de uma área específica,
-│   │                              # como navegar até a Sidebar de componentes, acessar o Model Provider,
-│   │                              # importar um flow JSON ou abrir a tela de configurações.
-│   │                              # Os testes usam esses objetos para interagir com a UI sem duplicar seletores.
+├── pages/
 │   ├── auth/                      # login, logout, tela de usuários
 │   ├── components/                # sidebar de componentes, busca, filtros
 │   ├── flows/                     # listagem, importação e exclusão de flows
@@ -104,28 +105,26 @@ tests/
 │
 └── tests-automations/
     ├── regression/
-    │   ├── api/                             # API REST (endpoints, execução, monitoramento)
-    │   │   └── flows/
-    │   ├── core-components/                 # configuração de componentes + componentes principais
-    │   ├── core-functionality/              # lógica central e operacional
-    │   │   ├── auth/                        # autenticação e gerenciamento de usuários
+    │   ├── api/
+    │   │   └── flows/             # endpoints REST (health check, CRUD, execução, monitoramento)
+    │   ├── core-components/       # configuração de componentes + componentes principais
+    │   ├── core-functionality/
+    │   │   ├── auth/              # autenticação e gerenciamento de usuários
     │   │   ├── knowledge-ingestion-management/  # upload, processamento e vetores
-    │   │   ├── model-provider/              # gestão de provedores (OpenAI, Ollama, etc.)
-    │   │   ├── observability-monitoring/    # tracing, logs e métricas
-    │   │   ├── playground/                  # chat, renderização e testes de saída
-    │   │   └── templates/                   # modelos pré-definidos de flows e componentes
-    │   ├── flow-functionality/              # execução de grafos, drag-and-drop e JSON
-    │   ├── mcp/                             # Model Context Protocol
-    │   │   ├── client/                      # consumo de ferramentas e contexto
-    │   │   └── server/                      # provedor de recursos e tools
-    │   ├── project-management/              # gestão de projetos e pastas
-    │   └── ui-ux/                           # interface visual, canvas e design system
+    │   │   ├── model-provider/    # gestão de provedores (OpenAI, Ollama, etc.)
+    │   │   ├── observability-monitoring/        # tracing, logs e métricas
+    │   │   ├── playground/        # chat, renderização e testes de saída
+    │   │   └── templates/         # modelos pré-definidos de flows e componentes
+    │   ├── flow-functionality/    # execução de grafos, drag-and-drop e JSON
+    │   ├── mcp/
+    │   │   ├── client/            # consumo de ferramentas e contexto
+    │   │   └── server/            # provedor de recursos e tools
+    │   ├── project-management/    # gestão de projetos e pastas
+    │   └── ui-ux/                 # interface visual, canvas e design system
     └── smoke/
         ├── api/
         └── ui-ux/
 ```
-
-A `fixtures/` intercepta erros `4xx/5xx` e falhas silenciosas de flow em toda execução — se o backend errar mas a UI não mostrar, o teste falha mesmo assim.
 
 ---
 
