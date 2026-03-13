@@ -78,20 +78,29 @@ tests/
 │
 ├── fixtures/                      # fixture base com monitoramento automático de erros de backend
 │
-├── helpers/                       # funções reutilizáveis por ação
-│   ├── api/
-│   ├── auth/
-│   ├── filesystem/
-│   ├── flows/
-│   ├── mcp/
-│   ├── other/
-│   └── ui/
+├── helpers/                       # Funções de ações específicas reutilizáveis entre testes.
+│   │                              # Cada helper encapsula uma operação concreta da aplicação,
+│   │                              # como selecionar o provedor e modelo de um agente, adicionar
+│   │                              # um componente customizado ao canvas, atualizar componentes
+│   │                              # desatualizados ou realizar o upload de um arquivo.
+│   │                              # Os testes chamam essas funções diretamente, sem repetir os passos.
+│   ├── api/                       # chamadas e validações de endpoints REST
+│   ├── auth/                      # login, logout, criação de usuários
+│   ├── filesystem/                # upload e gerenciamento de arquivos
+│   ├── flows/                     # criação, execução, importação e exclusão de flows
+│   ├── mcp/                       # configuração de MCP server e client
+│   ├── other/                     # ações diversas sem categoria específica
+│   └── ui/                        # interações de canvas, componentes, sidebar e playground
 │
-├── pages/                         # Page Objects
-│   ├── auth/
-│   ├── components/
-│   ├── flows/
-│   └── main/
+├── pages/                         # Page Objects — conjunto de funções para navegação da interface.
+│   │                              # Cada página encapsula as ações e elementos de uma área específica,
+│   │                              # como navegar até a Sidebar de componentes, acessar o Model Provider,
+│   │                              # importar um flow JSON ou abrir a tela de configurações.
+│   │                              # Os testes usam esses objetos para interagir com a UI sem duplicar seletores.
+│   ├── auth/                      # login, logout, tela de usuários
+│   ├── components/                # sidebar de componentes, busca, filtros
+│   ├── flows/                     # listagem, importação e exclusão de flows
+│   └── main/                      # página principal, navegação global, MCP, settings, model provider
 │
 └── tests-automations/
     ├── regression/
@@ -117,6 +126,77 @@ tests/
 ```
 
 A `fixtures/` intercepta erros `4xx/5xx` e falhas silenciosas de flow em toda execução — se o backend errar mas a UI não mostrar, o teste falha mesmo assim.
+
+---
+
+## Como criar um novo teste
+
+**1. Escolha a pasta correta**
+
+Localize dentro de `tests/tests-automations/regression/` a pasta que corresponde à área funcional do teste. Exemplos:
+
+| O que você vai testar | Pasta |
+|---|---|
+| Login, logout, gerenciamento de usuários | `core-functionality/auth/` |
+| Execução de flow, importação de JSON | `flow-functionality/` |
+| Configuração de model provider | `core-functionality/model-provider/` |
+| Canvas, sidebar, sticky notes | `ui-ux/` |
+| Endpoints REST | `api/flows/` |
+| Upload de arquivos, RAG | `core-functionality/knowledge-ingestion-management/` |
+| MCP server ou client | `mcp/server/` ou `mcp/client/` |
+
+**2. Nomeie o arquivo**
+
+O arquivo deve terminar em `.spec.ts` e ter um nome descritivo em kebab-case que identifique o comportamento testado:
+
+```
+login-invalid-credentials.spec.ts
+agent-model-provider-selection.spec.ts
+canvas-add-custom-component.spec.ts
+flow-import-json.spec.ts
+```
+
+**3. Estrutura básica do arquivo**
+
+```typescript
+import { test, expect } from "../../../fixtures";
+
+test.describe("Nome da área ou funcionalidade", () => {
+  test("deve [comportamento esperado] quando [condição]", async ({ page }) => {
+    await test.step("Descrição do passo 1", async () => {
+      // ação
+    });
+
+    await test.step("Descrição do passo 2", async () => {
+      // asserção
+    });
+  });
+});
+```
+
+> Importe sempre de `fixtures` — nunca diretamente do Playwright. A fixture base adiciona monitoramento automático de erros de backend.
+
+**4. Use helpers e pages existentes**
+
+Antes de escrever ações do zero, verifique se já existe um helper ou page object para o que você precisa:
+
+```typescript
+// exemplo: navegar até o model provider e selecionar um modelo
+import { navigateToModelProvider } from "../../pages/main/model-provider.page";
+import { selectProviderAndModel } from "../../helpers/ui/model-provider.helper";
+```
+
+**5. Adicione pelo menos uma tag**
+
+Todo teste deve ter uma tag para poder ser filtrado por suite:
+
+```typescript
+test("deve configurar o model provider", { tag: ["@components"] }, async ({ page }) => {
+```
+
+**6. Atualize o `QA_CHECKLIST.md`**
+
+Após criar o teste, localize o item correspondente no checklist e marque como `[-]` (automatizado, precisa validar). Somente mude para `[x]` após seguir o processo de validação descrito abaixo.
 
 ---
 
