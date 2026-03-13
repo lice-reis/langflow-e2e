@@ -1,8 +1,6 @@
 name: Langflow Source File Watcher
 
 on:
-  schedule:
-    - cron: "0 8 * * *"  # 05:00 BRT, daily — runs after nightly tests
   workflow_dispatch: {}
 
 jobs:
