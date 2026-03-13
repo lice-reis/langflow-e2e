@@ -71,14 +71,52 @@ Todo teste novo deve ter **pelo menos uma tag** e importar de `../../fixtures` (
 
 ```
 tests/
-├── core/         # obrigatórios — features, integrations, unit, regression
-├── extended/     # complementares — edge cases, regressões complexas
-├── pages/        # Page Objects
-├── utils/        # funções compartilhadas
-└── fixtures.ts   # fixture base com monitoramento automático de erros de backend
+├── assets/                        # arquivos de suporte aos testes
+│   ├── files/                     # documentos, PDFs, JSONs usados em upload
+│   ├── flows/                     # flows JSON pré-definidos para importação
+│   └── media/                     # imagens e arquivos de mídia
+│
+├── fixtures/                      # fixture base com monitoramento automático de erros de backend
+│
+├── helpers/                       # funções reutilizáveis por ação
+│   ├── api/
+│   ├── auth/
+│   ├── filesystem/
+│   ├── flows/
+│   ├── mcp/
+│   ├── other/
+│   └── ui/
+│
+├── pages/                         # Page Objects
+│   ├── auth/
+│   ├── components/
+│   ├── flows/
+│   └── main/
+│
+└── tests-automations/
+    ├── regression/
+    │   ├── api/                             # API REST (endpoints, execução, monitoramento)
+    │   │   └── flows/
+    │   ├── core-components/                 # configuração de componentes + componentes principais
+    │   ├── core-functionality/              # lógica central e operacional
+    │   │   ├── auth/                        # autenticação e gerenciamento de usuários
+    │   │   ├── knowledge-ingestion-management/  # upload, processamento e vetores
+    │   │   ├── model-provider/              # gestão de provedores (OpenAI, Ollama, etc.)
+    │   │   ├── observability-monitoring/    # tracing, logs e métricas
+    │   │   ├── playground/                  # chat, renderização e testes de saída
+    │   │   └── templates/                   # modelos pré-definidos de flows e componentes
+    │   ├── flow-functionality/              # execução de grafos, drag-and-drop e JSON
+    │   ├── mcp/                             # Model Context Protocol
+    │   │   ├── client/                      # consumo de ferramentas e contexto
+    │   │   └── server/                      # provedor de recursos e tools
+    │   ├── project-management/              # gestão de projetos e pastas
+    │   └── ui-ux/                           # interface visual, canvas e design system
+    └── smoke/
+        ├── api/
+        └── ui-ux/
 ```
 
-A `fixtures.ts` intercepta erros `4xx/5xx` e falhas silenciosas de flow em toda execução — se o backend errar mas a UI não mostrar, o teste falha mesmo assim.
+A `fixtures/` intercepta erros `4xx/5xx` e falhas silenciosas de flow em toda execução — se o backend errar mas a UI não mostrar, o teste falha mesmo assim.
 
 ---
 
@@ -195,7 +233,7 @@ O watcher cobre 12 áreas funcionais mapeadas a partir do source do Langflow:
 
 ## Regression Checklist
 
-Veja [`REGRESSION_CHECKLIST.md`](./REGRESSION_CHECKLIST.md) para o mapa completo de cobertura.
+Veja [`QA_CHECKLIST.md`](./QA_CHECKLIST.md) para o mapa completo de cobertura.
 
 | Símbolo | Significado |
 |---|---|
