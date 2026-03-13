@@ -60,39 +60,9 @@
 
 ---
 
-## api/ — Autenticação + API REST
+## api/ — API REST
 
-### 1. Autenticação e Gerenciamento de Usuários
-
-#### 1.1 Login / Logout
-- [-] Login com credenciais válidas (admin/admin) → `core/features/auto-login-off.spec.ts`
-- [-] Login com credenciais inválidas — deve exibir mensagem de erro → `core/features/login-invalid-credentials.spec.ts`
-- [-] Logout — deve redirecionar para tela de login → `core/features/logout-flow.spec.ts`
-- [-] Auto-login ativado (LANGFLOW_AUTO_LOGIN=true) — deve pular tela de login → `core/features/auto-login-off.spec.ts`
-- [-] Auto-login desativado — deve exibir tela de login → `extended/features/autoLogin.spec.ts`
-- [-] Sessão expirada — deve redirecionar para login ao tentar ação autenticada → `core/features/session-expired.spec.ts`
-- [-] Limpeza de sessão após logout → `core/regression/general-bugs-remove-session-after-logout.spec.ts`
-
-#### 1.2 Gerenciamento de Usuários (Admin)
-- [-] Admin cria novo usuário → `core/features/auto-login-off.spec.ts`
-- [-] Admin desativa usuário — usuário não consegue mais logar → `core/features/admin-user-management.spec.ts`
-- [-] Admin ativa usuário inativo — usuário consegue logar após ativação → `core/features/admin-user-management.spec.ts`
-- [-] Admin renomeia usuário → `core/features/admin-user-management.spec.ts`
-- [-] Admin altera senha de usuário — usuário loga com nova senha → `core/features/admin-password-change.spec.ts`
-- [-] Admin altera senha — senha antiga não funciona após troca → `core/features/admin-password-change.spec.ts`
-- [-] Fluxo de isolamento: user A não vê flows de user B → `core/features/auto-login-off.spec.ts`
-- [-] Configurações de usuário (user settings) → `extended/features/userSettings.spec.ts`
-
-#### 1.3 Variáveis Globais (API Keys)
-- [-] Criar variável global → `core/features/globalVariables.spec.ts`
-- [ ] Usar variável global em componente (API key)
-- [-] Editar variável global existente → `core/features/global-variable-edit.spec.ts`
-- [-] Deletar variável global → `core/features/global-variables-crud.spec.ts`
-- [-] Criar variável global do tipo "Generic" → `core/features/global-variables-crud.spec.ts`
-
----
-
-### 2. API REST
+### api/flows/ — API REST
 
 #### 2.1 Health Check
 - [-] GET `/api/v1/health_check` → status 200, db ok → `core/features/api-health-check.spec.ts`
@@ -211,6 +181,36 @@
 
 ## core-functionality/ — Lógica Central e Operacional
 
+### core-functionality/auth/ — Autenticação e Gerenciamento de Usuários
+
+#### 1.1 Login / Logout
+- [-] Login com credenciais válidas (admin/admin) → `core/features/auto-login-off.spec.ts`
+- [-] Login com credenciais inválidas — deve exibir mensagem de erro → `core/features/login-invalid-credentials.spec.ts`
+- [-] Logout — deve redirecionar para tela de login → `core/features/logout-flow.spec.ts`
+- [-] Auto-login ativado (LANGFLOW_AUTO_LOGIN=true) — deve pular tela de login → `core/features/auto-login-off.spec.ts`
+- [-] Auto-login desativado — deve exibir tela de login → `extended/features/autoLogin.spec.ts`
+- [-] Sessão expirada — deve redirecionar para login ao tentar ação autenticada → `core/features/session-expired.spec.ts`
+- [-] Limpeza de sessão após logout → `core/regression/general-bugs-remove-session-after-logout.spec.ts`
+
+#### 1.2 Gerenciamento de Usuários (Admin)
+- [-] Admin cria novo usuário → `core/features/auto-login-off.spec.ts`
+- [-] Admin desativa usuário — usuário não consegue mais logar → `core/features/admin-user-management.spec.ts`
+- [-] Admin ativa usuário inativo — usuário consegue logar após ativação → `core/features/admin-user-management.spec.ts`
+- [-] Admin renomeia usuário → `core/features/admin-user-management.spec.ts`
+- [-] Admin altera senha de usuário — usuário loga com nova senha → `core/features/admin-password-change.spec.ts`
+- [-] Admin altera senha — senha antiga não funciona após troca → `core/features/admin-password-change.spec.ts`
+- [-] Fluxo de isolamento: user A não vê flows de user B → `core/features/auto-login-off.spec.ts`
+- [-] Configurações de usuário (user settings) → `extended/features/userSettings.spec.ts`
+
+#### 1.3 Variáveis Globais (API Keys)
+- [-] Criar variável global → `core/features/globalVariables.spec.ts`
+- [ ] Usar variável global em componente (API key)
+- [-] Editar variável global existente → `core/features/global-variable-edit.spec.ts`
+- [-] Deletar variável global → `core/features/global-variables-crud.spec.ts`
+- [-] Criar variável global do tipo "Generic" → `core/features/global-variables-crud.spec.ts`
+
+---
+
 ### core-functionality/playground/ — Chat, Renderização e Testes de Saída
 
 #### 5. Playground
@@ -321,9 +321,9 @@
 
 ---
 
-### core-functionality/knowledge-ingestion/ — Upload, Processamento e Vetores
+### core-functionality/knowledge-ingestion-management/ — Upload, Processamento e Vetores
 
-#### 8. Knowledge Ingestion
+#### 8. Knowledge Ingestion Management
 
 ##### 8.1 File Upload
 - [-] Upload de arquivo via componente → `core/unit/fileUploadComponent.spec.ts`
@@ -336,6 +336,63 @@
 - [ ] Indexação em Vector Store (Chroma/Astra/Pinecone) — documento disponível para consulta
 - [ ] Query ao Vector Store retorna chunks relevantes ao prompt
 - [ ] Pipeline RAG completo (ingest → embed → store → retrieve → answer) executa sem erro
+
+---
+
+### core-functionality/templates/ — Modelos Pré-definidos de Flows e Componentes
+
+#### 13. Templates (Starter Projects)
+
+#### 13.1 Templates Básicos
+- [-] **Basic Prompting** (OpenAI) → `core/integrations/Basic Prompting.spec.ts`
+- [-] **Basic Prompting** (Anthropic) → `core/integrations/Basic Prompting Anthropic.spec.ts`
+- [-] **Simple Agent** (OpenAI) → `core/integrations/Simple Agent.spec.ts`
+- [-] **Simple Agent** (Anthropic) → `core/integrations/Simple Agent Anthropic.spec.ts`
+- [-] **Simple Agent** com memória → `core/integrations/Simple Agent Memory.spec.ts`
+- [-] **Vector Store RAG** → `core/integrations/Vector Store.spec.ts`
+- [-] **Memory Chatbot** → `core/integrations/Memory Chatbot.spec.ts`
+
+#### 13.2 Templates de Geração de Conteúdo
+- [-] **Blog Writer** → `core/integrations/Blog Writer.spec.ts`
+- [-] **Instagram Copywriter** → `core/integrations/Instagram Copywriter.spec.ts`
+- [-] **Twitter Thread Generator** → `core/integrations/Twitter Thread Generator.spec.ts`
+- [-] **SEO Keyword Generator** → `core/integrations/SEO Keyword Generator.spec.ts`
+- [-] **Portfolio Website Code Generator** → `core/integrations/Portfolio Website Code Generator.spec.ts`
+- [-] **SaaS Pricing** → `core/integrations/SaaS Pricing.spec.ts`
+
+#### 13.3 Templates de Análise e Processamento
+- [-] **Document QA** → `core/integrations/Document QA.spec.ts`
+- [-] **Invoice Summarizer** → `core/integrations/Invoice Summarizer.spec.ts`
+- [-] **Financial Report Parser** → `core/integrations/Financial Report Parser.spec.ts`
+- [-] **Image Sentiment Analysis** → `core/integrations/Image Sentiment Analysis.spec.ts`
+- [-] **Text Sentiment Analysis** → `core/integrations/Text Sentiment Analysis.spec.ts`
+- [-] **Youtube Analysis** → `core/integrations/Youtube Analysis.spec.ts`
+
+#### 13.4 Templates de Agentes
+- [-] **Dynamic Agent** → `core/integrations/Dynamic Agent.spec.ts`
+- [-] **Hierarchical Agent** → `core/integrations/Hierarchical Agent.spec.ts`
+- [-] **Sequential Task Agent** → `core/integrations/Sequential Agent.spec.ts`
+- [-] **Social Media Agent** → `core/integrations/Social Media Agent.spec.ts`
+- [-] **Travel Planning Agent** → `core/integrations/Travel Planning Agent.spec.ts`
+- [-] **Market Research** → `core/integrations/Market Research.spec.ts`
+- [-] **Research Translation Loop** → `core/integrations/Research Translation Loop.spec.ts`
+- [-] **Pokedex Agent** → `core/integrations/Pokedex Agent.spec.ts`
+- [-] **Price Deal Finder** → `core/integrations/Price Deal Finder.spec.ts`
+- [-] **News Aggregator** → `core/integrations/News Aggregator.spec.ts`
+
+#### 13.5 Templates Avançados
+- [-] **Custom Component Generator** → `core/integrations/Custom Component Generator.spec.ts`
+- [-] **Prompt Chaining** → `core/integrations/Prompt Chaining.spec.ts`
+- [-] **Decision Flow** → `core/integrations/decisionFlow.spec.ts`
+- [-] **Similarity** → `core/integrations/similarity.spec.ts`
+- [-] **MCP Server** (starter projects) → `extended/features/mcp-server-starter-projects.spec.ts`
+
+#### 13.6 Shards de Starter Projects
+- [-] Starter Projects Shard 1 → `core/integrations/starter-projects-shard1.spec.ts`
+- [-] Starter Projects Shard 2 → `core/integrations/starter-projects-shard2.spec.ts`
+- [-] Starter Projects Shard 3 → `core/integrations/starter-projects-shard3.spec.ts`
+- [-] Starter Projects Shard 4 → `core/integrations/starter-projects-shard4.spec.ts`
+- [-] Starter Projects (extended) → `extended/features/starter-projects.spec.ts`
 
 ---
 
@@ -426,63 +483,6 @@
 - [~] Navegar entre pastas — flows corretos exibidos por pasta → `core/features/flow-navigation-folders.spec.ts`
 - [-] Pesquisar flow por nome filtra resultados corretamente → `core/features/flow-navigation-folders.spec.ts`
 - [-] Pastas na sidebar de navegação → `extended/features/integration-side-bar.spec.ts`
-
----
-
-## templates/ — Modelos Pré-definidos de Flows e Componentes
-
-### 13. Templates (Starter Projects)
-
-#### 13.1 Templates Básicos
-- [-] **Basic Prompting** (OpenAI) → `core/integrations/Basic Prompting.spec.ts`
-- [-] **Basic Prompting** (Anthropic) → `core/integrations/Basic Prompting Anthropic.spec.ts`
-- [-] **Simple Agent** (OpenAI) → `core/integrations/Simple Agent.spec.ts`
-- [-] **Simple Agent** (Anthropic) → `core/integrations/Simple Agent Anthropic.spec.ts`
-- [-] **Simple Agent** com memória → `core/integrations/Simple Agent Memory.spec.ts`
-- [-] **Vector Store RAG** → `core/integrations/Vector Store.spec.ts`
-- [-] **Memory Chatbot** → `core/integrations/Memory Chatbot.spec.ts`
-
-#### 13.2 Templates de Geração de Conteúdo
-- [-] **Blog Writer** → `core/integrations/Blog Writer.spec.ts`
-- [-] **Instagram Copywriter** → `core/integrations/Instagram Copywriter.spec.ts`
-- [-] **Twitter Thread Generator** → `core/integrations/Twitter Thread Generator.spec.ts`
-- [-] **SEO Keyword Generator** → `core/integrations/SEO Keyword Generator.spec.ts`
-- [-] **Portfolio Website Code Generator** → `core/integrations/Portfolio Website Code Generator.spec.ts`
-- [-] **SaaS Pricing** → `core/integrations/SaaS Pricing.spec.ts`
-
-#### 13.3 Templates de Análise e Processamento
-- [-] **Document QA** → `core/integrations/Document QA.spec.ts`
-- [-] **Invoice Summarizer** → `core/integrations/Invoice Summarizer.spec.ts`
-- [-] **Financial Report Parser** → `core/integrations/Financial Report Parser.spec.ts`
-- [-] **Image Sentiment Analysis** → `core/integrations/Image Sentiment Analysis.spec.ts`
-- [-] **Text Sentiment Analysis** → `core/integrations/Text Sentiment Analysis.spec.ts`
-- [-] **Youtube Analysis** → `core/integrations/Youtube Analysis.spec.ts`
-
-#### 13.4 Templates de Agentes
-- [-] **Dynamic Agent** → `core/integrations/Dynamic Agent.spec.ts`
-- [-] **Hierarchical Agent** → `core/integrations/Hierarchical Agent.spec.ts`
-- [-] **Sequential Task Agent** → `core/integrations/Sequential Agent.spec.ts`
-- [-] **Social Media Agent** → `core/integrations/Social Media Agent.spec.ts`
-- [-] **Travel Planning Agent** → `core/integrations/Travel Planning Agent.spec.ts`
-- [-] **Market Research** → `core/integrations/Market Research.spec.ts`
-- [-] **Research Translation Loop** → `core/integrations/Research Translation Loop.spec.ts`
-- [-] **Pokedex Agent** → `core/integrations/Pokedex Agent.spec.ts`
-- [-] **Price Deal Finder** → `core/integrations/Price Deal Finder.spec.ts`
-- [-] **News Aggregator** → `core/integrations/News Aggregator.spec.ts`
-
-#### 13.5 Templates Avançados
-- [-] **Custom Component Generator** → `core/integrations/Custom Component Generator.spec.ts`
-- [-] **Prompt Chaining** → `core/integrations/Prompt Chaining.spec.ts`
-- [-] **Decision Flow** → `core/integrations/decisionFlow.spec.ts`
-- [-] **Similarity** → `core/integrations/similarity.spec.ts`
-- [-] **MCP Server** (starter projects) → `extended/features/mcp-server-starter-projects.spec.ts`
-
-#### 13.6 Shards de Starter Projects
-- [-] Starter Projects Shard 1 → `core/integrations/starter-projects-shard1.spec.ts`
-- [-] Starter Projects Shard 2 → `core/integrations/starter-projects-shard2.spec.ts`
-- [-] Starter Projects Shard 3 → `core/integrations/starter-projects-shard3.spec.ts`
-- [-] Starter Projects Shard 4 → `core/integrations/starter-projects-shard4.spec.ts`
-- [-] Starter Projects (extended) → `extended/features/starter-projects.spec.ts`
 
 ---
 
